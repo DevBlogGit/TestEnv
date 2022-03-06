@@ -1,0 +1,357 @@
+<!-- CAMERA -->
+<html>
+<script>
+</script>
+
+<h2>Dynamic Input, Dynamic Update (JSON -> HTML) Generator </h2>
+<button id="TEMPIN_ADD_Btn">
+	ADD INPUT TAG
+</button>
+
+<button id="TEMPIN_UPDATE_Btn">
+	ADD UPDATE INPUT TAG
+</button>
+
+
+<div id="TEMPINParent">
+
+</div>
+
+<h2>Dynamic HTML Tags -> JSON CONVERTER </h2>
+<button id="TEMPIN_TOJSON_Btn">
+	CONVERT ADD INPUT
+</button>
+
+</html>
+
+
+<!-- ACTION -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // ========= TEMPLATE =========
+    // Make Read Object1
+    let tempRead = new read.dbObject('TEMPOUT', 'R');
+    console.log(tempRead.tableName);
+
+    // Make Insert Object
+    let tempInsert = new insert.dbObject('TEMPIN', 'I');
+    let TEMPINAddBtn = document.getElementById('TEMPIN_ADD_Btn');
+
+    // Make Update Object 
+    let tempUpdate = new insert.dbObject('TEMPIN', 'U');
+    let TEMPINUpdateBtn = document.getElementById('TEMPIN_UPDATE_Btn');
+
+    // Make Converter Btn
+    let TEMPIN_TOJSON_Btn = document.getElementById('TEMPIN_TOJSON_Btn');
+
+    // Btn Event Listeners
+    TEMPINAddBtn.addEventListener('click', function() {
+        tempInsert.addDynamicHtml();
+    });
+    TEMPINUpdateBtn.addEventListener('click', function() {
+        tempUpdate.updateDynamicHtml();
+    });
+    TEMPIN_TOJSON_Btn.addEventListener('click', function() {
+        tempUpdate.htmlToJsonConvert();
+    });
+    //
+    // ========= /TEMPLATE =========
+});
+
+// ===================================== JSON_OBJ -> HTML INSERT/READ CONVERTER =====================================
+
+var names = names || {};
+
+
+var insert = insert || {};
+var drawInput = drawInput || {};
+
+var read = read || {};
+var drawOutput = drawOutput || {};
+
+var getter = getter || {};
+
+// STRING CONSTANT
+names = {
+    TEMPLATENM: 'TEMPIN',
+}
+
+// db jsonObj
+req = {
+    initTemplateObj: [{
+        'item0': 1,
+        'item1': 2,
+        'item2': 3,
+    }]
+}
+
+// DYNAMIC INSERT
+// DECLARE IN ADD BUTTON HTML : html.addDynamicHtml('TEMP')
+// add to DATA LOCATION : id="TEMPINParent"
+insert = {
+    dbObject: class {
+        constructor(tableName, option) {
+            this.tableName = tableName;
+            this.initDBList = [];
+            this.tagIdNumb = 0;
+            this.tagIdNumbList = [];
+            this.option = option;
+        }
+
+        // Dynamic Input
+        addDynamicHtml() {
+            this.addToHTML(this.tableName, null, this.tagIdNumb + this.tableName, this.tagIdNumb);
+            this.tagIdNumbList.push(this.tagIdNumb);
+            this.tagIdNumb += 1;
+        }
+
+        // Dynamic Update
+        updateDynamicHtml() {
+            let jsonData = this.switchJsonData(this.tableName);
+            this.addToHTML(this.tableName, jsonData, this.tagIdNumb + this.tableName, this.tagIdNumb);
+            this.tagIdNumbList.push(this.tagIdNumb);
+            this.tagIdNumb += 1;
+        }
+
+        switchJsonData(tableName) {
+            switch (tableName) {
+                case names.TEMPLATENM: // 강점 교과목
+                    return req.initTemplateObj;
+                default:
+                    console.log('setHtmlData Null');
+            }
+        }
+
+        addToHTML(tagName, jsonDynamicObjs, tagIdName, tagIdNumber) {
+            //debugger;
+            let parentTagId = tagName + "Parent";
+            var tableLocation = document.getElementById(parentTagId);
+            let htmlStringTable = "";
+
+            // 1 대외 데이터로 전부 html 생성까지 루프.  
+            if (jsonDynamicObjs) {
+                let objSize = jsonDynamicObjs.length || 1;
+                if (objSize > 1) {
+                    for (var i = 0; i < objSize; i++) {
+                        htmlStringTable += this.switchInputHTML(tagName, jsonDynamicObjs[i], tagIdName, tagIdNumber); // 멀티
+                    }
+                } else {
+                    htmlStringTable += this.switchInputHTML(tagName, jsonDynamicObjs, tagIdName, tagIdNumber); // 단일
+                }
+            } else {
+                htmlStringTable += this.switchInputHTML(tagName, null, tagIdName, tagIdNumber);  // 없음 
+            }
+
+            // 2 HTML 넣기
+            tableLocation.insertAdjacentHTML('beforeend', htmlStringTable);
+
+            // 3 체크박스 값 넣기
+            if (jsonDynamicObjs) {
+                let objSize = jsonDynamicObjs.length || 1;
+                if (objSize > 1) {
+                    for (var i = 0; i < objSize; i++) {
+                        this.setDynamicTableOptions(tagName, tagIdName, jsonDynamicObjs[i]);
+                    }
+                } else {
+                    this.setDynamicTableOptions(tagName, tagIdName, jsonDynamicObjs);
+                }
+            }
+
+        }
+
+        setDynamicTableOptions(tagName, tagIdName, jsonDynamicObjs) {
+            let val = "";
+            let sel = "";
+
+            switch (tagName) {
+                // TEMPLATE
+                case 'abc':
+                    val = jsonDynamicObjs.TYPE;
+                    sel = document.getElementById(tagName + 'TYPE');
+                    this.setOptionsForTable(sel, val);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        setOptionsForTable(sel, val) {
+            if (sel) {
+                var options = sel.options;
+                for (var opt, j = 0; opt = options[j]; j++) {
+                    if (opt.value == val) {
+                        sel.selectedIndex = j;
+                        break;
+                    }
+                }
+            }
+        }
+
+        switchInputHTML(tagName, jsonObj, tagIdName, tagIdNumber) {
+            // console.log('setHtmlData tagName : '+tagIdName);
+            switch (tagName) {
+                case names.TEMPLATENM: 
+                    return drawInput.makeInputHTML(tagName, jsonObj, tagIdName, tagIdNumber);
+                default:
+                    console.log('setHtmlData Null');
+            }
+        }
+
+        // HTML -> JSON
+        htmlToJsonConvert() {
+            var jsonDTO = {
+                /*
+                "item1" : "",
+                "item2" : "", 
+                "item3" : ""
+                */
+            };
+            let jsonArr = [];
+            let tagIdNumberList = this.tagIdNumbList;
+            let size = 0;
+            let tagName = this.tableName;
+
+            for (var i = 0; i < tagIdNumberList.length; i++) {
+                jsonArr = this.switchHtmlViewData(tagIdNumberList[i] + tagName, jsonArr);
+            }
+            // NULL CHECK
+            console.log('htmlToJsonConvert ' + jsonArr.length + '  ' + tagName);
+            jsonArr.length >= 0 ? jsonDTO[tagName] = jsonArr : ""
+            //jsonDTO[tagName] = jsonArr; 
+            console.log(jsonDTO[tagName]);
+
+        }
+
+        switchHtmlViewData(tagIdAddress, jsonsArr) {
+            switch (this.tableName) {
+                case names.TEMPLATENM: 
+                    return getter.getHtmlValues(tagIdAddress, jsonsArr);
+                default:
+                    console.log('switchHtmlViewData Null');
+            }
+        }
+
+    }
+}
+
+getter = {
+    getHtmlValues(tagIdAddress, jsonsArr) {
+        console.log('getHtmlValues { tagIdAddresss : ' + tagIdAddress + " }")
+        let args0 = document.getElementById(tagIdAddress + "itemOne") ? document.getElementById(tagIdAddress + "itemOne").value : '';
+        let args1 = document.getElementById(tagIdAddress + "itemTwo") ? document.getElementById(tagIdAddress + "itemTwo").value : '';
+        let args2 = document.getElementById(tagIdAddress + "itemThree") ? document.getElementById(tagIdAddress + "itemThree").value : '';
+
+        let jsonData = {
+            USER_ID: 'TEST', //common.getUserId(),
+            SPEC_TYPE: args0,
+            SPEC_TITLE: args1,
+            SPEC_DATE: args2,
+        }
+        // size = Object.values(jsonData).length;
+        jsonsArr.push(jsonData);
+        return jsonsArr;
+
+    }
+}
+
+
+drawInput = {
+    makeInputHTML(tagName, jsonObj, tagIdName, tagIdNumber) {
+        console.log('makeInputHTML { tagIdName : ' + tagIdName + " }")
+        let htmlTag = "",
+            varTag = "";
+        let args0 = "",
+            args1 = "",
+            args2 = "";
+
+        // 수정의 경우
+        if (jsonObj) {
+            args0 = jsonObj[0].item0 || "";
+            args1 = jsonObj[0].item1 || "";
+            args2 = jsonObj[0].item2 || "";
+        }
+
+        htmlTag +=
+            `
+			<tr>
+				<th name="tag" scope="row">제목</th>
+				<td>
+					<input id="${tagIdName}itemOne" name="${tagIdName}itemOne" value="${args0}" maxlength="200" type="text" class="inptxt" placeholder="입력">
+				</td>
+								<td>
+					<input id="${tagIdName}itemTwo" name="${tagIdName}itemTwo" value="${args1}" maxlength="200" type="text" class="inptxt" placeholder="입력">
+				</td>
+								<td>
+					<input id="${tagIdName}itemThree" name="${tagIdName}itemThree" value="${args2}" maxlength="200" type="text" class="inptxt" placeholder="입력">
+				</td>
+			</tr>
+			`;
+        return htmlTag;
+    }
+}
+
+// DYNAMIC READ
+// add to DATA LOCATION : id="View"
+read = {
+    dbObject: class {
+        constructor(tableName) {
+            this.tableName = tableName;
+        }
+
+        addStaticTable(jsonList) {
+            for (var jsonObj of jsonList) {
+                // 정적 HTML 추가 
+                this.addToHTML(jsonObj, this.tableName);
+            }
+        }
+
+        addToHTML(jsonObj, tagName) {
+            let putHtmlParentId = tagName + "View";
+            var tableLocation = document.getElementById(putHtmlParentId);
+            let htmlStringTable = "";
+
+            // 1 대외 데이터로 전부 html 생성까지 루프.  
+            if (jsonDynamicObjs) {
+                let objSize = jsonDynamicObjs.length || 1;
+                if (objSize > 1) {
+                    for (var i = 0; i < objSize; i++) {
+                        htmlStringTable += this.makeStaticHtmlTable(jsonDynamicObjs[i], tagName);
+                    }
+                } else {
+                    htmlStringTable += this.makeStaticHtmlTable(jsonDynamicObjs, tagName);
+                }
+            }
+            // 2 HTML 넣기
+            tableLocation.insertAdjacentHTML('beforeend', htmlStringTable);
+        }
+
+        setHtmlData(tagName, jsonDynamicObj, tagIdName, tagIdNumber) {
+            switch (tagIdName) {
+                case names.TEMPLATENM:
+                    return drawOutput.makeOutputHTML(tagName, jsonDynamicObj, tagIdNumber, tagIdName);
+                default:
+                    console.log('setHtmlData Null');
+            }
+        }
+
+    }
+
+}
+
+drawOutput = {
+    makeOutputHTML(tagName, jsonObj, tagIdName, tagIdNumber) {
+        let htmlTag, varTag = "";
+        if (jsonObj) {
+            htmlTag +=
+                `
+				 <tr>
+					 <td>${jsonObj.item1}</td>
+				 </tr>
+				`;
+        }
+        return htmlTag;
+    }
+}
+
+// ===================================== / JSON_OBJ -> HTML INSERT/READ CONVERTER =====================================
+</script>

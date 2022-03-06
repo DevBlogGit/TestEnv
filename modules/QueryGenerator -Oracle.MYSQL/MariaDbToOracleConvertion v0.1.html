@@ -1,0 +1,265 @@
+<html>
+
+<head>
+<style>
+input
+	{
+		position: absolute;
+		right: 100%;
+	}
+
+input:checked + div
+	{
+		display: block;
+	}
+/*
+div
+	{
+		display: none;
+	}
+*/
+
+label {
+		color: #B4886B;
+		font-weight: bold;
+		width: 250px;
+		margin: 50px;
+
+}
+textarea {
+		width: 50%;
+		height: 100px;
+		padding: 10px;
+		box-sizing: border-box;
+		border: solid 2px #1E90FF;
+		border-radius: 5px;
+		font-size: 16px;
+		resize: both;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+<script src="https://unpkg.com/sql-formatter@2.3.3/dist/sql-formatter.min.js"></script>
+
+<script>
+  
+// Textarea Change
+window.addEventListener("load", function() {
+
+		// 1 텍스트 입력시 이벤트
+		//====================
+		var area =  document.getElementById("TA1");
+		if (area.addEventListener) {
+		  area.addEventListener('input', function() {
+			// event handling code for sane browsers
+			areaTextChange();
+		  }, false);
+		} else if (area.attachEvent) {
+		  area.attachEvent('onpropertychange', function() {
+			// IE-specific event handling code
+			areaTextChange();
+		  });
+		}
+		//====================
+}); 
+
+function areaTextChange(){
+  // GET
+  /*
+  * TA1 : JAVA AS-IS
+  * TA2 : 쿼리 TO-BE
+  */
+  let TA1 = document.getElementById("TA1").value;
+  let TA2 = document.getElementById("TA2").value;
+  
+  TA2 = TA2.replace(/"/g, '');
+  
+  let TA1List = stringToList(TA1, '\n');
+  let TA2List = stringToList(TA2, '\n'); // 전체 교체로하면 문제가 되서 한줄씩 처리 
+
+	// 1 데이터 추출 및 교체 
+	convertMYSQLToORACLE(TA1List, TA2List);
+	
+	// 2 화면에 출력 
+    let outputArea = document.getElementById("outputArea");
+	// Beautify SQL
+	let format2 = window.sqlFormatter.format;
+	let str = TA2List.join(' ');
+	
+	
+	let formatSQL= format2(str);
+	console.log(formatSQL);
+	outputArea.innerText = formatSQL; // innerText for beautify format 
+	// outputArea.insertAdjacentHTML( 'beforeend', formatSQL );	
+	
+	
+  	// 3 복사 이벤트 추가 
+	new ClipboardJS('.btn', {
+		target: function(trigger) {
+	    	return trigger.previousSibling;
+		}
+    });
+
+}
+
+// 1 데이터 추출 및 교체 
+function convertMYSQLToORACLE(TA1List, TA2List){
+
+	for(let i=0; i < TA1List.length ; i++){	
+		  let tableNameOracle ='';
+		  let tableNameMySQL ='';
+		  
+		  // EXTRACT ORACLE VIEW TABLE COLUMN
+		  let firstItem = TA1List[i]; // PatternToReplaceWith
+		  let indexStart = firstItem.indexOf('.put') + 5;	// INDEX TO FIRSTITE
+		  let indexEnd = firstItem.indexOf('.name');	 
+		  firstItem = firstItem.substring(indexStart, indexEnd);
+		  tableNameOracle = firstItem;
+		  let indexSplit = firstItem.indexOf('.') + 1;	 
+		  firstItem = firstItem.substring(indexSplit);
+		  //console.log(firstItem); // USER_EM
+	  
+		  // EXTRACT MYSQL TABLE COLUMN
+		  let secondItem = TA1List[i]; // PatternToLookUp
+		  indexStart = secondItem.indexOf('.name') + 9;	// INDEX TO FIRSTITE
+		  indexEnd = secondItem.lastIndexOf('.name');	 
+		  secondItem = secondItem.substring(indexStart, indexEnd);
+		  tableNameMySQL = secondItem;
+		  indexSplit = secondItem.indexOf('.') + 1;	
+		  secondItem = secondItem.substring(indexSplit);
+		  
+		  // EXTRACT TABLENAME ORACLE
+		  let indexSlice = tableNameOracle.indexOf('.') ;	 
+		  tableNameOracle = tableNameOracle.substring(0 , indexSlice);
+		  //console.log(tableNameOracle);
+		  
+		  // EXTRACT TABLENAME MYSQL
+		  indexSlice = tableNameMySQL.indexOf('.') ;	 
+		  tableNameMySQL = tableNameMySQL.substring(0 , indexSlice);
+		  //console.log(tableNameMySQL);
+
+		  //console.log(secondItem); // USER_EM  
+		  
+		  //let regex = '\\b'+secondItem+'/gi'; 
+		  
+		  // mappedKeyValue[firstItem] = secondItem;
+		  
+		  for(let i=0; i < TA2List.length ; i++){
+			//let parsedStr = TA2List[i];
+			//parsedStr.indexOf('.put')
+			TA2List[i] = TA2List[i].replace(secondItem, firstItem);
+			TA2List[i] = TA2List[i].replace(tableNameMySQL, tableNameOracle);
+					//console.log(TA2List[i]);
+		  }	  
+	}
+	
+	
+};
+
+
+
+function convertMariaToOracleSQL(text){
+	replaceSUBSTRING_INDEX(text);
+}
+
+function replaceSUBSTRING_INDEX(text){
+//	let textToConvert ='SUBSTRING_INDEX(YN.APL_DATE, '~',-1) AS END_DATE,';
+	// 1 SUBSTRING_INDEX 위치 찾기 
+}
+
+function makeMapObject(key, value, mapObj){
+	let newNum = key;
+	let newVal = value;
+	mapObj[newNum] = newVal;
+	return mapObj;
+}
+
+
+function nthIndex(str, pat, n){
+    var L= str.length, i= -1;
+    while(n-- && i++<L){
+        i= str.indexOf(pat, i);
+        if (i < 0) break;
+    }
+    return i;
+}
+
+function stringToList(fullString, separator) {
+  //fullString = fullString.replace(/\s+/g, '');
+  var fullArray = [];
+
+  if (fullString !== undefined) {
+    if (fullString.indexOf(separator) == -1) {
+      fullArray.push(fullString);
+    } else {
+      fullArray = fullString.split(separator);
+    }
+  }
+
+  return fullArray;
+}
+
+
+function replaceWithRegExp(txt, mapObj, re ){
+	txt = txt.replace(re, function(matched){
+		return mapObj[matched.toLowerCase()];
+	})
+}; 
+
+// 복사 이벤트 추가 
+function makeCopyClipboard(copyId){  
+	return "<button class='btn' data-clipboard-target=#"+copyId+">복사</button>";
+} 
+
+var tagsToReplace = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;'
+};
+
+function replaceTag(tag) {
+    return tagsToReplace[tag] || tag;
+}
+
+function safe_tags_replace(str) {
+    return str.replace(/[&<>]/g, replaceTag);
+}
+
+</script>
+</head>
+
+<body>
+<h4>JAVA AS-IS</h4>
+<textarea id="TA1" placeholder="LECTURE_HISTORY_MAP.put(VW_EDU_CRET_INFO.STUID.name(), LECTURE_HISTORY.STUDENT_ID.name());">
+</textarea>
+
+
+<h4>쿼리 AS-IS</h4>
+<textarea id="TA2" placeholder="select SEQ from TABLE">
+</textarea>
+
+<br>
+
+
+
+<br>
+<br>
+
+<!-- TABNav -->
+<h4>쿼리 TO-BE</h4>
+
+<!-- TABContent -->
+<div id="outputArea">
+    
+</div>
+
+<br><br>
+
+<!--
+<h4>테이블 생성 주석</h4>
+<textarea  id="textAreaComment">
+</textarea>
+<div id="textAreaDiv">
+</div>
+-->
+</body>
+</html>
