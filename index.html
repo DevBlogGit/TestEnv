@@ -43,7 +43,7 @@
       <img src="./assets/brand/bootstrap-logo-white.svg" width="38" height="30" class="me-3" alt="Bootstrap">
       Cheatsheet
     </h1>
-    <a href="./examples/cheatsheet-rtl/" class="ms-auto link-light" hreflang="ar">RTL cheatsheet</a>
+   
   </div>
 </header>
 <aside class="bd-aside sticky-xl-top text-muted align-self-start mb-3 mb-xl-5 px-2">
@@ -51,10 +51,14 @@
   <nav class="small" id="toc">
     <ul class="list-unstyled">
       <li class="my-2">
-        <button class="btn d-inline-flex align-items-center collapsed" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#contents-collapse" aria-controls="contents-collapse">Contents</button>
-        <ul class="list-unstyled ps-3 collapse" id="contents-collapse">
-          <li><a class="d-inline-flex align-items-center rounded" href="#Contents_1">FRONT TEST ENV</a></li>
+        <button class="btn d-inline-flex align-items-center collapsed" data-bs-toggle="collapse" aria-expanded="true" data-bs-target="#contents-collapse" aria-controls="contents-collapse">Contents</button>
+        <!-- collapse show, aria-expaned = true to keep expanded at start -->
+        <ul class="list-unstyled ps-3 collapse show" id="contents-collapse">
+
+          <li><a class="d-inline-flex align-items-center rounded" href="#Contents_1">TEST ENV TOOLS</a></li>
           <li><a class="d-inline-flex align-items-center rounded" href="#Contents_2">DEV MOTIVATION</a></li>
+          <li><a class="d-inline-flex align-items-center rounded" href="#Contents_3">VELOG</a></li>
+
         </ul>
       </li>
       <!--
@@ -104,7 +108,7 @@
 
     <article class="my-3" id="Contents_1">
       <div class="bd-heading sticky-xl-top align-self-start mt-5 mb-3 mt-xl-0 mb-xl-2">
-        <h3>TEST ENV</h3>
+        <h3>TEST ENV TOOLS</h3>
         <a class="d-flex align-items-center" href="#">Documentation</a>
       </div>
 
@@ -117,7 +121,7 @@
       <br>
       <a class="link-info" href="https://codebeautify.org/sqlformatter">SQL Beautify</a>
       <br>
-      <a class="link-info" href="https://beautifier.io/">HTML/CSS/JS Beautify</a>
+      <a class="link-info" href="https://beautifier.io/">HTML/CSS/JS Beautify</a>  
       </div>
       
     </article>
@@ -125,9 +129,7 @@
     <article class="my-3" id="Contents_2">
       <div class="bd-heading sticky-xl-top align-self-start mt-5 mb-3 mt-xl-0 mb-xl-2">
         <h3>DEV Motivation</h3>
-       
       </div>
-
       <div>
       <a class="link-info" href="https://okky.kr/">OKKY</a>
       <br>
@@ -136,8 +138,21 @@
       <a class="link-info" href="https://programmers.co.kr/learn/challenges?tab=all_challenges">프로그래머즈</a>
       <br>
       <a class="link-info" href="https://www.udemy.com/">UDEMY</a>
+       <br>
+      <a class="link-info" href="https://devhints.io/">https://devhints.io/</a>
       </div>
-      
+    </article>
+
+    <article class="my-3" id="Contents_3">
+      <div class="bd-heading sticky-xl-top align-self-start mt-5 mb-3 mt-xl-0 mb-xl-2">
+        <h3>GROWTH</h3>
+      </div>
+      <div>
+      <a class="link-info" href="https://velog.io/">VELOG</a>
+      <br>
+      <a class="link-info" href="https://github.com/gyoogle/tech-interview-for-developer">인터뷰 질문</a>
+      <br>
+      </div>
     </article>
 
     <!--
